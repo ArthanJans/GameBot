@@ -14,8 +14,12 @@ var helpcommand = "$gamehelp"
 
 func main() {
 	runtime.GOMAXPROCS(2)
-	readJSON(&cfg, "config.json")
-	readJSON(&mem, "memory.json")
+	if err := readJSON(&cfg, "config.json"); err != nil {
+		return
+	}
+	if err := readJSON(&mem, "memory.json"); err != nil {
+		return
+	}
 	commandSetup()
 	defer writeJSON(&mem, "memory.json")
 

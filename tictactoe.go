@@ -15,16 +15,20 @@ func tictactoe(s *dg.Session, m *dg.MessageCreate, args []string) {
 }
 
 func start(s *dg.Session, m *dg.MessageCreate, args []string) {
-	opponent := strings.TrimPrefix(strings.TrimSuffix(args[0], ">"), "<@")
-	if opponent != m.Author.ID {
-		if _, ok := mem["request:"+m.Author.ID+","+m.ChannelID]; !ok {
-			mem["request:"+m.Author.ID+","+m.ChannelID] = opponent
-			s.ChannelMessageSend(m.ChannelID, "Request sent\nOpponent must accept by doing $tictactoe accept <@"+m.Author.ID+">")
+	if len(args) > 0 {
+		opponent := strings.TrimPrefix(strings.TrimSuffix(args[0], ">"), "<@")
+		if opponent != m.Author.ID {
+			if _, ok := mem["request:"+m.Author.ID+","+m.ChannelID]; !ok {
+				mem["request:"+m.Author.ID+","+m.ChannelID] = opponent
+				s.ChannelMessageSend(m.ChannelID, "Request sent\nOpponent must accept by doing $tictactoe accept <@"+m.Author.ID+">")
+			} else {
+				s.ChannelMessageSend(m.ChannelID, "Cannot make multiple requests on the same channel")
+			}
 		} else {
-			s.ChannelMessageSend(m.ChannelID, "Cannot make multiple requests on the same channel")
+			s.ChannelMessageSend(m.ChannelID, "Cannot send request to yourself")
 		}
 	} else {
-		s.ChannelMessageSend(m.ChannelID, "Cannot send request to yourself")
+		s.ChannelMessageSend(m.ChannelID, "Please specify a person to start a game with")
 	}
 }
 

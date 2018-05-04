@@ -16,8 +16,8 @@ func parseCommand(s *dg.Session, m *dg.MessageCreate) {
 			com := v
 			commandLength := 1
 			for _, word := range words[1:] {
-				if _, ok := com.subCommands[word]; ok {
-					com = com.subCommands[word]
+				if val, ok := com.subCommands[word]; ok {
+					com = val
 					commandLength++
 				} else {
 					break
