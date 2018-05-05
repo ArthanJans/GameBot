@@ -13,11 +13,7 @@ func sendBoard(s *dg.Session, m *dg.MessageCreate, board string) {
 		row := rows[i]
 		for j := 0; j < 3; j++ {
 			pos := row[j]
-			if string(pos) == "n" {
-				out += " "
-			} else {
-				out += string(pos)
-			}
+			out += string(pos)
 			if j < 2 {
 				out += "|"
 			}
@@ -69,7 +65,7 @@ func accept(s *dg.Session, m *dg.MessageCreate, args []string) {
 		if v, ok := mem["request:"+opponent+","+m.ChannelID]; ok {
 			if v == m.Author.ID {
 				delete(mem, "request:"+opponent+","+m.ChannelID)
-				emptyBoard := "nnn,nnn,nnn"
+				emptyBoard := "   ,   ,   "
 				mem["game:"+m.Author.ID+","+opponent+","+m.ChannelID] = emptyBoard
 				s.ChannelMessageSend(m.ChannelID, "Game started")
 				sendBoard(s, m, emptyBoard)
