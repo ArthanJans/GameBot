@@ -8,21 +8,25 @@ import (
 
 func sendBoard(s *dg.Session, m *dg.MessageCreate, board string) {
 	rows := strings.Split(board, ",")
-	out := ""
+	out := "Current board:\n```"
 	for i := 0; i < 3; i++ {
 		row := rows[i]
 		for j := 0; j < 3; j++ {
 			pos := row[j]
-			out += string(pos)
+			if string(pos) == "n" {
+				out += " "
+			} else {
+				out += string(pos)
+			}
 			if j < 2 {
 				out += "|"
 			}
 		}
-		out += "\n"
 		if i < 2 {
-			out += "-+-+-"
+			out += "\n-+-+-\n"
 		}
 	}
+	out += "```"
 	s.ChannelMessageSend(m.ChannelID, out)
 }
 
@@ -64,11 +68,13 @@ func accept(s *dg.Session, m *dg.MessageCreate, args []string) {
 		opponent := strings.TrimPrefix(strings.TrimSuffix(args[0], ">"), "<@")
 		if v, ok := mem["request:"+opponent+","+m.ChannelID]; ok {
 			if v == m.Author.ID {
-				delete(mem, "request:"+m.Author.ID+","+m.ChannelID)
+				delete(mem, "request:"+opponent+","+m.ChannelID)
 				emptyBoard := "nnn,nnn,nnn"
 				mem["game:"+m.Author.ID+","+opponent+","+m.ChannelID] = emptyBoard
 				s.ChannelMessageSend(m.ChannelID, "Game started")
 				sendBoard(s, m, emptyBoard)
+			} else {
+				s.ChannelMessageSend(m.ChannelID, "That person has not sent you a request")
 			}
 		} else {
 			s.ChannelMessageSend(m.ChannelID, "That person has not sent you a request")

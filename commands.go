@@ -63,4 +63,5 @@ func commandSetup() {
 	addCommand("tictactoe", tictactoe)
 	addSubCommands("start", start, "tictactoe")
 	addSubCommands("cancelRequest", cancelRequest, "tictactoe")
+	addSubCommands("accept", accept, "tictactoe")
 }
