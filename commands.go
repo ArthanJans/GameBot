@@ -9,7 +9,7 @@ import (
 var newMessageCommands = map[string]*command{}
 
 func parseCommand(s *dg.Session, m *dg.MessageCreate) {
-	if m.Content[0] == '$' {
+	if m.Content != "" && m.Content[0] == '$' {
 		message := m.Content[1:]
 		words := strings.Fields(message)
 		if v, ok := newMessageCommands[words[0]]; ok {
@@ -64,4 +64,5 @@ func commandSetup() {
 	addSubCommands("start", start, "tictactoe")
 	addSubCommands("cancelRequest", cancelRequest, "tictactoe")
 	addSubCommands("accept", accept, "tictactoe")
+	addSubCommands("concede", concede, "tictactoe")
 }

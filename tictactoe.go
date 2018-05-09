@@ -133,5 +133,7 @@ func concede(s *dg.Session, m *dg.MessageCreate, args []string) {
 		s.ChannelMessageSend(m.ChannelID, "Congratulations <@"+opponent+"> wins!")
 		delete(mem, "game,"+m.Author.ID+","+opponent+","+m.ChannelID)
 		delete(mem, "game,"+opponent+","+m.Author.ID+","+m.ChannelID)
+	} else {
+		s.ChannelMessageSend(m.ChannelID, "Cannot concede when not in a game")
 	}
 }
