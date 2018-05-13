@@ -22,6 +22,15 @@ func getGame(player string, channelID string) string {
 	return ""
 }
 
+func setGame(player string, channelID string, game string) {
+	for k := range mem {
+		params := strings.Split(k, ",")
+		if params[0] == "game" && params[3] == channelID && (params[1] == player || params[2] == player) {
+			mem[k] = game
+		}
+	}
+}
+
 func getOpponent(player string, channelID string) string {
 	for k := range mem {
 		params := strings.Split(k, ",")
@@ -36,7 +45,7 @@ func getOpponent(player string, channelID string) string {
 	return ""
 }
 
-func sendBoard(s *dg.Session, m *dg.MessageCreate, board string, players []string) {
+func sendBoard(s *dg.Session, m *dg.MessageCreate, board string) {
 	rows := strings.Split(board, ",")
 	if len(rows) == 4 {
 		out := "Current board:\n```"
@@ -53,15 +62,37 @@ func sendBoard(s *dg.Session, m *dg.MessageCreate, board string, players []strin
 				out += "\n-+-+-\n"
 			}
 		}
-		out += "```\n"
-		if rows[3] == "0" {
-			out += "<@" + players[0] + ">'s turn"
+		out += "```"
+		if player, err := s.User(rows[3]); err == nil {
+			out += player.Username + "'s turn"
 		} else {
-			out += "<@" + players[1] + ">'s turn"
+			fmt.Println("Couldn't find player ID")
+			fmt.Println(err)
 		}
 		s.ChannelMessageSend(m.ChannelID, out)
 	} else {
 		fmt.Println("Board format incorrect")
+	}
+}
+
+func checkWin(s *dg.Session, m *dg.MessageCreate, board string) {
+	if player, err := s.User(m.Author.ID); err == nil {
+		rows := strings.Split(board, ",")
+		for i := 0; i < 3; i++ {
+			row := rows[i]
+			if row == "XXX" || row == "OOO" {
+				if opponent := getOpponent(m.Author.ID, m.ChannelID); opponent != "" {
+					s.ChannelMessageSend(m.ChannelID, "Congratulations "+player.Username+" wins!")
+					delete(mem, "game,"+m.Author.ID+","+opponent+","+m.ChannelID)
+					delete(mem, "game,"+opponent+","+m.Author.ID+","+m.ChannelID)
+				} else {
+					fmt.Println("Game won but no opponent found")
+				}
+			}
+		}
+	} else {
+		fmt.Println("Couldn't find player ID")
+		fmt.Println(err)
 	}
 }
 
@@ -110,10 +141,26 @@ func accept(s *dg.Session, m *dg.MessageCreate, args []string) {
 				if v == m.Author.ID {
 					delete(mem, "request,"+opponent+","+m.ChannelID)
 					start := rand.Intn(2)
-					emptyBoard := "   ,   ,   ," + string(start)
+					emptyBoard := "   ,   ,   ,"
+					if start == 0 {
+						emptyBoard += m.Author.ID + ",O"
+					} else {
+						emptyBoard += opponent + ",X"
+					}
 					mem["game,"+m.Author.ID+","+opponent+","+m.ChannelID] = emptyBoard
 					s.ChannelMessageSend(m.ChannelID, "Game started")
-					sendBoard(s, m, emptyBoard, []string{opponent, m.Author.ID})
+					if op, err := s.User(opponent); err == nil {
+						if us, err1 := s.User(m.Author.ID); err1 == nil {
+							s.ChannelMessageSend(m.ChannelID, op.Username+" is X's and "+us.Username+" is O's")
+							sendBoard(s, m, emptyBoard)
+						} else {
+							fmt.Println("Couldn't find player ID")
+							fmt.Println(err1)
+						}
+					} else {
+						fmt.Println("Couldn't find player ID")
+						fmt.Println(err)
+					}
 				} else {
 					s.ChannelMessageSend(m.ChannelID, "That person has not sent you a request")
 				}
@@ -130,10 +177,64 @@ func accept(s *dg.Session, m *dg.MessageCreate, args []string) {
 
 func concede(s *dg.Session, m *dg.MessageCreate, args []string) {
 	if opponent := getOpponent(m.Author.ID, m.ChannelID); opponent != "" {
-		s.ChannelMessageSend(m.ChannelID, "Congratulations <@"+opponent+"> wins!")
-		delete(mem, "game,"+m.Author.ID+","+opponent+","+m.ChannelID)
-		delete(mem, "game,"+opponent+","+m.Author.ID+","+m.ChannelID)
+		if player, err := s.User(opponent); err == nil {
+			s.ChannelMessageSend(m.ChannelID, "Congratulations "+player.Username+" wins!")
+			delete(mem, "game,"+m.Author.ID+","+opponent+","+m.ChannelID)
+			delete(mem, "game,"+opponent+","+m.Author.ID+","+m.ChannelID)
+		} else {
+			fmt.Println("Player conceded but opponent's ID not found")
+			fmt.Println(err)
+		}
 	} else {
 		s.ChannelMessageSend(m.ChannelID, "Cannot concede when not in a game")
+	}
+}
+
+var rows = map[string]int{
+	"top":    0,
+	"middle": 1,
+	"bottom": 2,
+}
+
+var cols = map[string]int{
+	"left":   0,
+	"middle": 1,
+	"right":  2,
+}
+
+func play(s *dg.Session, m *dg.MessageCreate, args []string) {
+	if len(args) >= 2 {
+		if game := getGame(m.Author.ID, m.ChannelID); game != "" {
+			if params := strings.Split(game, ","); params[3] == m.Author.ID {
+				if row, ok := rows[strings.ToLower(args[0])]; ok {
+					if col, ok := rows[strings.ToLower(args[1])]; ok {
+						if string(params[row][col]) == " " {
+							params[row] = params[row][:col] + params[4] + params[row][col+1:]
+							params[3] = getOpponent(m.Author.ID, m.ChannelID)
+							if params[4] == "X" {
+								params[4] = "O"
+							} else {
+								params[4] = "X"
+							}
+							sendBoard(s, m, strings.Join(params, ","))
+							setGame(m.Author.ID, m.ChannelID, game)
+							checkWin(s, m, game)
+						} else {
+							s.ChannelMessageSend(m.ChannelID, "That space is not empty")
+						}
+					} else {
+						s.ChannelMessageSend(m.ChannelID, "Usage:\n$tictactoe play [top|middle|bottom] [left|middle|right]")
+					}
+				} else {
+					s.ChannelMessageSend(m.ChannelID, "Usage:\n$tictactoe play [top|middle|bottom] [left|middle|right]")
+				}
+			} else {
+				s.ChannelMessageSend(m.ChannelID, "It is not your turn")
+			}
+		} else {
+			s.ChannelMessageSend(m.ChannelID, "You are not in a game")
+		}
+	} else {
+		s.ChannelMessageSend(m.ChannelID, "Usage:\n$tictactoe play [top|middle|bottom] [left|middle|right]")
 	}
 }
