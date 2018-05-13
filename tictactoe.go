@@ -47,7 +47,7 @@ func getOpponent(player string, channelID string) string {
 
 func sendBoard(s *dg.Session, m *dg.MessageCreate, board string) {
 	rows := strings.Split(board, ",")
-	if len(rows) == 4 {
+	if len(rows) == 5 {
 		out := "Current board:\n```"
 		for i := 0; i < 3; i++ {
 			row := rows[i]
