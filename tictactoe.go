@@ -89,7 +89,44 @@ func checkWin(s *dg.Session, m *dg.MessageCreate, board string) {
 				} else {
 					fmt.Println("Game won but no opponent found")
 				}
+				return
 			}
+		}
+		for i := 0; i < 3; i++ {
+			if rows[0][i] == rows[1][i] && rows[1][i] == rows[2][i] {
+				if opponent := getOpponent(m.Author.ID, m.ChannelID); opponent != "" {
+					s.ChannelMessageSend(m.ChannelID, "Congratulations "+player.Username+" wins!")
+					delete(mem, "game,"+m.Author.ID+","+opponent+","+m.ChannelID)
+					delete(mem, "game,"+opponent+","+m.Author.ID+","+m.ChannelID)
+				} else {
+					fmt.Println("Game won but no opponent found")
+				}
+				return
+			}
+		}
+		if (rows[0][0] == rows[1][1] && rows[1][1] == rows[2][2]) || (rows[0][2] == rows[1][1] && rows[1][1] == rows[2][0]) {
+			if opponent := getOpponent(m.Author.ID, m.ChannelID); opponent != "" {
+				s.ChannelMessageSend(m.ChannelID, "Congratulations "+player.Username+" wins!")
+				delete(mem, "game,"+m.Author.ID+","+opponent+","+m.ChannelID)
+				delete(mem, "game,"+opponent+","+m.Author.ID+","+m.ChannelID)
+			} else {
+				fmt.Println("Game won but no opponent found")
+			}
+			return
+		}
+		for x := 0; x < 3; x++ {
+			for y := 0; y < 3; y++ {
+				if string(rows[0][0]) == " " {
+					return
+				}
+			}
+		}
+		if opponent := getOpponent(m.Author.ID, m.ChannelID); opponent != "" {
+			s.ChannelMessageSend(m.ChannelID, "It's a draw")
+			delete(mem, "game,"+m.Author.ID+","+opponent+","+m.ChannelID)
+			delete(mem, "game,"+opponent+","+m.Author.ID+","+m.ChannelID)
+		} else {
+			fmt.Println("Game drawn but no opponent found")
 		}
 	} else {
 		fmt.Println("Couldn't find player ID")
