@@ -29,6 +29,7 @@ func setGame(player string, channelID string, game string) {
 			mem[k] = game
 		}
 	}
+	fmt.Println("Error setting game")
 }
 
 func getOpponent(player string, channelID string) string {
@@ -207,7 +208,7 @@ func play(s *dg.Session, m *dg.MessageCreate, args []string) {
 		if game := getGame(m.Author.ID, m.ChannelID); game != "" {
 			if params := strings.Split(game, ","); params[3] == m.Author.ID {
 				if row, ok := rows[strings.ToLower(args[0])]; ok {
-					if col, ok := rows[strings.ToLower(args[1])]; ok {
+					if col, ok := cols[strings.ToLower(args[1])]; ok {
 						if string(params[row][col]) == " " {
 							params[row] = params[row][:col] + params[4] + params[row][col+1:]
 							params[3] = getOpponent(m.Author.ID, m.ChannelID)
@@ -216,7 +217,8 @@ func play(s *dg.Session, m *dg.MessageCreate, args []string) {
 							} else {
 								params[4] = "X"
 							}
-							sendBoard(s, m, strings.Join(params, ","))
+							game = strings.Join(params, ",")
+							sendBoard(s, m, game)
 							setGame(m.Author.ID, m.ChannelID, game)
 							checkWin(s, m, game)
 						} else {
