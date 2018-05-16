@@ -116,7 +116,7 @@ func checkWin(s *dg.Session, m *dg.MessageCreate, board string) {
 		}
 		for x := 0; x < 3; x++ {
 			for y := 0; y < 3; y++ {
-				if string(rows[0][0]) == " " {
+				if string(rows[x][y]) == " " {
 					return
 				}
 			}
@@ -132,6 +132,7 @@ func checkWin(s *dg.Session, m *dg.MessageCreate, board string) {
 		fmt.Println("Couldn't find player ID")
 		fmt.Println(err)
 	}
+	return
 }
 
 func tictactoe(s *dg.Session, m *dg.MessageCreate, args []string) {
