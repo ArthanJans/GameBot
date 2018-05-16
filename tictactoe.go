@@ -27,6 +27,7 @@ func setGame(player string, channelID string, game string) {
 		params := strings.Split(k, ",")
 		if params[0] == "game" && params[3] == channelID && (params[1] == player || params[2] == player) {
 			mem[k] = game
+			return
 		}
 	}
 	fmt.Println("Error setting game")
