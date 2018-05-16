@@ -93,7 +93,7 @@ func checkWin(s *dg.Session, m *dg.MessageCreate, board string) {
 			}
 		}
 		for i := 0; i < 3; i++ {
-			if rows[0][i] == rows[1][i] && rows[1][i] == rows[2][i] {
+			if rows[0][i] == rows[1][i] && rows[1][i] == rows[2][i] && string(rows[0][i]) != " " {
 				if opponent := getOpponent(m.Author.ID, m.ChannelID); opponent != "" {
 					s.ChannelMessageSend(m.ChannelID, "Congratulations "+player.Username+" wins!")
 					delete(mem, "game,"+m.Author.ID+","+opponent+","+m.ChannelID)
@@ -104,7 +104,7 @@ func checkWin(s *dg.Session, m *dg.MessageCreate, board string) {
 				return
 			}
 		}
-		if (rows[0][0] == rows[1][1] && rows[1][1] == rows[2][2]) || (rows[0][2] == rows[1][1] && rows[1][1] == rows[2][0]) {
+		if (rows[0][0] == rows[1][1] && rows[1][1] == rows[2][2]) || (rows[0][2] == rows[1][1] && rows[1][1] == rows[2][0]) && string(rows[1][1]) != " " {
 			if opponent := getOpponent(m.Author.ID, m.ChannelID); opponent != "" {
 				s.ChannelMessageSend(m.ChannelID, "Congratulations "+player.Username+" wins!")
 				delete(mem, "game,"+m.Author.ID+","+opponent+","+m.ChannelID)
