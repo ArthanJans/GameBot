@@ -78,7 +78,8 @@ func sendBoard(s *dg.Session, m *dg.MessageCreate, board string) {
 }
 
 func checkWin(s *dg.Session, m *dg.MessageCreate, board string) bool {
-	if player, err := s.User(m.Author.ID); err == nil {
+	player, err := s.User(m.Author.ID)
+	if err == nil {
 		rows := strings.Split(board, ",")
 		for i := 0; i < 3; i++ {
 			row := rows[i]
@@ -118,7 +119,7 @@ func checkWin(s *dg.Session, m *dg.MessageCreate, board string) bool {
 		for x := 0; x < 3; x++ {
 			for y := 0; y < 3; y++ {
 				if string(rows[x][y]) == " " {
-					return true
+					return false
 				}
 			}
 		}
@@ -129,10 +130,10 @@ func checkWin(s *dg.Session, m *dg.MessageCreate, board string) bool {
 		} else {
 			fmt.Println("Game drawn but no opponent found")
 		}
-	} else {
-		fmt.Println("Couldn't find player ID")
-		fmt.Println(err)
+		return true
 	}
+	fmt.Println("Couldn't find player ID")
+	fmt.Println(err)
 	return false
 }
 
