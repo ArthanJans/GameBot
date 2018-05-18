@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"os"
 )
 
 var cfg map[string]string
@@ -30,7 +29,7 @@ func writeJSON(variable interface{}, fileName string) error {
 		fmt.Println(err)
 		return err
 	}
-	if err = ioutil.WriteFile(fileName, b, os.FileMode(0)); err != nil {
+	if err = ioutil.WriteFile(fileName, b, 0644); err != nil {
 		fmt.Println(err)
 		return err
 	}
