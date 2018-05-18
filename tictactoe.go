@@ -77,7 +77,7 @@ func sendBoard(s *dg.Session, m *dg.MessageCreate, board string) {
 	}
 }
 
-func checkWin(s *dg.Session, m *dg.MessageCreate, board string) {
+func checkWin(s *dg.Session, m *dg.MessageCreate, board string) bool {
 	if player, err := s.User(m.Author.ID); err == nil {
 		rows := strings.Split(board, ",")
 		for i := 0; i < 3; i++ {
@@ -90,7 +90,7 @@ func checkWin(s *dg.Session, m *dg.MessageCreate, board string) {
 				} else {
 					fmt.Println("Game won but no opponent found")
 				}
-				return
+				return true
 			}
 		}
 		for i := 0; i < 3; i++ {
@@ -102,7 +102,7 @@ func checkWin(s *dg.Session, m *dg.MessageCreate, board string) {
 				} else {
 					fmt.Println("Game won but no opponent found")
 				}
-				return
+				return true
 			}
 		}
 		if (rows[0][0] == rows[1][1] && rows[1][1] == rows[2][2]) || (rows[0][2] == rows[1][1] && rows[1][1] == rows[2][0]) && string(rows[1][1]) != " " {
@@ -113,12 +113,12 @@ func checkWin(s *dg.Session, m *dg.MessageCreate, board string) {
 			} else {
 				fmt.Println("Game won but no opponent found")
 			}
-			return
+			return true
 		}
 		for x := 0; x < 3; x++ {
 			for y := 0; y < 3; y++ {
 				if string(rows[x][y]) == " " {
-					return
+					return true
 				}
 			}
 		}
@@ -133,7 +133,7 @@ func checkWin(s *dg.Session, m *dg.MessageCreate, board string) {
 		fmt.Println("Couldn't find player ID")
 		fmt.Println(err)
 	}
-	return
+	return false
 }
 
 func tictactoe(s *dg.Session, m *dg.MessageCreate, args []string) {
@@ -257,9 +257,10 @@ func play(s *dg.Session, m *dg.MessageCreate, args []string) {
 								params[4] = "X"
 							}
 							game = strings.Join(params, ",")
-							sendBoard(s, m, game)
-							setGame(m.Author.ID, m.ChannelID, game)
-							checkWin(s, m, game)
+							if !checkWin(s, m, game) {
+								sendBoard(s, m, game)
+								setGame(m.Author.ID, m.ChannelID, game)
+							}
 						} else {
 							s.ChannelMessageSend(m.ChannelID, "That space is not empty")
 						}
