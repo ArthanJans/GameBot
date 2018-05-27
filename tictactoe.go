@@ -148,7 +148,7 @@ func tictactoe(s *dg.Session, m *dg.MessageCreate, args []string) {
 func start(s *dg.Session, m *dg.MessageCreate, args []string) {
 	if len(args) > 0 {
 		if !inGame(m.Author.ID, m.ChannelID) {
-			opponent := strings.TrimPrefix(strings.TrimSuffix(args[0], ">"), "<@")
+			opponent := idFromTag(args[0])
 			if opponent != m.Author.ID {
 				if _, ok := mem["request,"+m.Author.ID+","+m.ChannelID]; !ok {
 					mem["request,"+m.Author.ID+","+m.ChannelID] = opponent
@@ -177,7 +177,7 @@ func cancelRequest(s *dg.Session, m *dg.MessageCreate, args []string) {
 func accept(s *dg.Session, m *dg.MessageCreate, args []string) {
 	if len(args) > 0 {
 		if !inGame(m.Author.ID, m.ChannelID) {
-			opponent := strings.TrimPrefix(strings.TrimSuffix(args[0], ">"), "<@")
+			opponent := idFromTag(args[0])
 			if v, ok := mem["request,"+opponent+","+m.ChannelID]; ok {
 				if v == m.Author.ID {
 					delete(mem, "request,"+opponent+","+m.ChannelID)

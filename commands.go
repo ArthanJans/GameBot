@@ -33,7 +33,7 @@ func addCommand(call string, function func(s *dg.Session, m *dg.MessageCreate, a
 	com.add(call)
 }
 
-func addSubCommands(call string, function func(s *dg.Session, m *dg.MessageCreate, args []string), parentCommand string) {
+func addSubCommand(call string, function func(s *dg.Session, m *dg.MessageCreate, args []string), parentCommand string) {
 	words := strings.Fields(parentCommand)
 	if v, ok := newMessageCommands[words[0]]; ok {
 		com := v
@@ -61,9 +61,11 @@ func help(s *dg.Session, m *dg.MessageCreate, args []string) {
 func commandSetup() {
 	addCommand("gamehelp", help)
 	addCommand("tictactoe", tictactoe)
-	addSubCommands("start", start, "tictactoe")
-	addSubCommands("cancelRequest", cancelRequest, "tictactoe")
-	addSubCommands("accept", accept, "tictactoe")
-	addSubCommands("concede", concede, "tictactoe")
-	addSubCommands("play", play, "tictactoe")
+	addSubCommand("start", start, "tictactoe")
+	addSubCommand("cancelRequest", cancelRequest, "tictactoe")
+	addSubCommand("accept", accept, "tictactoe")
+	addSubCommand("concede", concede, "tictactoe")
+	addSubCommand("play", play, "tictactoe")
+	addCommand("higherorlower", higherorlower)
+	addSubCommand("show", show, "higherorlower")
 }
