@@ -68,4 +68,7 @@ func commandSetup() {
 	addSubCommand("play", playttt, "tictactoe")
 	addCommand("higherorlower", higherorlower)
 	addSubCommand("show", show, "higherorlower")
+	addSubCommand("play", playhol, "higherorlower")
+	addSubCommand("highscore", highscore, "higherorlower")
+	addSubCommand("streak", streak, "higherorlower")
 }
