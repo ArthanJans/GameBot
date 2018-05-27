@@ -24,19 +24,19 @@ var values = map[int]string{
 }
 
 var layouts = map[int]string{
-	1:  "|       |\n|       |\n|       |\n|   %v   |\n|       |\n|       |\n|       |\n",
-	2:  "|   %v   |\n|       |\n|       |\n|       |\n|       |\n|       |\n|   %v   |\n",
-	3:  "|   %v   |\n|       |\n|       |\n|   %v   |\n|       |\n|       |\n|   %v   |\n",
-	4:  "| %v   %v |\n|       |\n|       |\n|       |\n|       |\n|       |\n| %v   %v |\n",
-	5:  "| %v   %v |\n|       |\n|       |\n|   %v   |\n|       |\n|       |\n| %v   %v |\n",
-	6:  "| %v   %v |\n|       |\n|       |\n| %v   %v |\n|       |\n|       |\n| %v   %v |\n",
-	7:  "| %v   %v |\n|       |\n|   %v   |\n| %v   %v |\n|       |\n|       |\n| %v   %v |\n",
-	8:  "| %v   %v |\n|       |\n| %v   %v |\n|       |\n| %v   %v |\n|       |\n| %v   %v |\n",
-	9:  "| %v   %v |\n|   %v   |\n| %v   %v |\n|       |\n| %v   %v |\n|       |\n| %v   %v |\n",
-	10: "| %v   %v |\n|   %v   |\n| %v   %v |\n|       |\n| %v   %v |\n|   %v   |\n| %v   %v |\n",
-	11: "|       |\n|       |\n|       |\n|   J   |\n|       |\n|       |\n|       |\n",
-	12: "|       |\n|       |\n|       |\n|   Q   |\n|       |\n|       |\n|       |\n",
-	13: "|       |\n|       |\n|       |\n|   K   |\n|       |\n|       |\n|       |\n",
+	1:  "|         |\n|         |\n|         |\n|    %v    |\n|         |\n|         |\n|         |\n",
+	2:  "|    %v    |\n|         |\n|         |\n|         |\n|         |\n|         |\n|    %v    |\n",
+	3:  "|    %v    |\n|         |\n|         |\n|    %v    |\n|         |\n|         |\n|    %v    |\n",
+	4:  "|  %v   %v  |\n|         |\n|         |\n|         |\n|         |\n|         |\n|  %v   %v  |\n",
+	5:  "|  %v   %v  |\n|         |\n|         |\n|    %v    |\n|         |\n|         |\n| %v   %v  |\n",
+	6:  "|  %v   %v  |\n|         |\n|         |\n|  %v   %v  |\n|         |\n|         |\n|  %v   %v  |\n",
+	7:  "|  %v   %v  |\n|         |\n|    %v    |\n|  %v   %v  |\n|         |\n|         |\n|  %v   %v  |\n",
+	8:  "|  %v   %v  |\n|         |\n|  %v   %v  |\n|         |\n|  %v   %v  |\n|         |\n|  %v   %v  |\n",
+	9:  "|  %v   %v  |\n|    %v    |\n|  %v   %v  |\n|         |\n|  %v   %v  |\n|       |\n|  %v   %v  |\n",
+	10: "|  %v   %v  |\n|    %v    |\n|  %v   %v  |\n|         |\n|  %v   %v  |\n|    %v    |\n|  %v   %v  |\n",
+	11: "|         |\n|         |\n|         |\n|    J    |\n|         |\n|         |\n|         |\n",
+	12: "|         |\n|         |\n|         |\n|    Q    |\n|         |\n|         |\n|         |\n",
+	13: "|         |\n|         |\n|         |\n|    K    |\n|         |\n|         |\n|         |\n",
 }
 
 var suits = map[int]string{
@@ -67,6 +67,10 @@ func show(s *dg.Session, m *dg.MessageCreate, args []string) {
 	}
 }
 
+func playhol(s *dg.Session, m *dg.MessageCreate, args []string) {
+
+}
+
 func displayCard(s *dg.Session, m *dg.MessageCreate, card int) {
 	display := "```/¯¯¯¯¯¯¯\\\n"
 	suit := card / 13
@@ -82,7 +86,7 @@ func displayCard(s *dg.Session, m *dg.MessageCreate, card int) {
 	display += "|" + displayValue + "      |\n"
 	display += "|" + displaySuit + "      |\n"
 	display += layouts[value]
-	display += "\n\\_______/"
+	display += "\n\\_______/```"
 	display = fmt.Sprintf(display, displaySuit)
 
 	s.ChannelMessageSend(m.ChannelID, display)

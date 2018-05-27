@@ -243,7 +243,7 @@ var cols = map[string]int{
 	"right":  2,
 }
 
-func play(s *dg.Session, m *dg.MessageCreate, args []string) {
+func playttt(s *dg.Session, m *dg.MessageCreate, args []string) {
 	if len(args) >= 2 {
 		if game := getGame(m.Author.ID, m.ChannelID); game != "" {
 			if params := strings.Split(game, ","); params[3] == m.Author.ID {
