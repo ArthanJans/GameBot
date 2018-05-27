@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"strconv"
+	"strings"
 
 	dg "github.com/bwmarrin/discordgo"
 )
@@ -63,12 +65,118 @@ func show(s *dg.Session, m *dg.MessageCreate, args []string) {
 		}
 	} else {
 		mem["card,"+m.Author.ID] = "1"
+		mem["deck,"+m.Author.ID] = "1"
+		mem["streak,"+m.Author.ID] = "0"
+		mem["high,"+m.Author.ID] = "0"
 		displayCard(s, m, 1)
 	}
 }
 
-func playhol(s *dg.Session, m *dg.MessageCreate, args []string) {
+func highscore(s *dg.Session, m *dg.MessageCreate, args []string) {
+	playerid := ""
+	if len(args) == 0 {
+		playerid = m.Author.ID
+	} else {
+		playerid = idFromTag(args[0])
+	}
+	if val, ok := mem["high,"+playerid]; ok {
+		s.ChannelMessageSend(m.ChannelID, val)
+	}
+}
 
+func streak(s *dg.Session, m *dg.MessageCreate, args []string) {
+	playerid := ""
+	if len(args) == 0 {
+		playerid = m.Author.ID
+	} else {
+		playerid = idFromTag(args[0])
+	}
+	if val, ok := mem["streak,"+playerid]; ok {
+		s.ChannelMessageSend(m.ChannelID, val)
+	}
+}
+
+func playhol(s *dg.Session, m *dg.MessageCreate, args []string) {
+	if len(args) > 0 {
+		if strings.ToLower(args[0]) == "higher" || strings.ToLower(args[0]) == "lower" {
+			var a []int
+			lastCard := 0
+			if val, ok := mem["card,"+m.Author.ID]; ok {
+				if num, err := strconv.Atoi(val); err != nil {
+					fmt.Println(err)
+				} else {
+					lastCard = num
+				}
+			} else {
+				mem["card,"+m.Author.ID] = "1"
+				mem["deck,"+m.Author.ID] = "1"
+				mem["streak,"+m.Author.ID] = "0"
+				mem["high,"+m.Author.ID] = "0"
+				lastCard = 1
+			}
+			if val, ok := mem["deck,"+m.Author.ID]; ok {
+				vals := strings.Fields(val)
+				for i := 1; i < 53; i++ {
+					found := false
+					for j := range vals {
+						if num, err := strconv.Atoi(vals[j]); err != nil {
+							fmt.Println(err)
+						} else {
+							if num == i {
+								found = true
+							}
+						}
+					}
+					if !found {
+						a = append(a, i)
+					}
+				}
+			} else {
+				mem["card,"+m.Author.ID] = "1"
+				mem["deck,"+m.Author.ID] = "1"
+				for i := 2; i < 53; i++ {
+					a = append(a, i)
+				}
+			}
+			if len(a) == 0 {
+				a = []int{}
+				for i := 1; i < 53; i++ {
+					if i != lastCard {
+						a = append(a, i)
+					}
+				}
+				mem["deck,"+m.Author.ID] = ""
+			}
+			card := a[rand.Intn(len(a))]
+			displayCard(s, m, card)
+			mem["card,"+m.Author.ID] = strconv.Itoa(card)
+			mem["deck,"+m.Author.ID] += strconv.Itoa(card)
+			if card%13 > lastCard && strings.ToLower(args[0]) == "higher" || card%13 < lastCard && strings.ToLower(args[0]) == "lower" {
+				s.ChannelMessageSend(m.ChannelID, "Congrats you got it right!")
+				if num, err := strconv.Atoi(mem["streak,"+m.Author.ID]); err != nil {
+					fmt.Println(err)
+				} else {
+					mem["streak,"+m.Author.ID] = strconv.Itoa(num + 1)
+					if high, err := strconv.Atoi(mem["high,"+m.Author.ID]); err != nil {
+						fmt.Println(err)
+					} else {
+						if num+1 > high {
+							mem["high,"+m.Author.ID] = strconv.Itoa(num)
+						}
+					}
+				}
+			} else if card%13 > lastCard && strings.ToLower(args[0]) == "lower" || card%13 < lastCard && strings.ToLower(args[0]) == "higher" {
+				s.ChannelMessageSend(m.ChannelID, "Unfortunately you got it wrong.")
+				mem["streak,"+m.Author.ID] = "0"
+			} else {
+				s.ChannelMessageSend(m.ChannelID, "It was the same.")
+			}
+		} else {
+			s.ChannelMessageSend(m.ChannelID, "Usage:\n$higherorlower play [higher|lower]")
+		}
+	} else {
+		s.ChannelMessageSend(m.ChannelID, "Usage:\n$higherorlower play [higher|lower]")
+	}
 }
 
 func displayCard(s *dg.Session, m *dg.MessageCreate, card int) {
@@ -86,7 +194,7 @@ func displayCard(s *dg.Session, m *dg.MessageCreate, card int) {
 	display += "|" + displayValue + "         |\n"
 	display += "|" + displaySuit + "        |\n"
 	display += layouts[value]
-	display += "\n\\__________/```"
+	display += "\\__________/```"
 	display = fmt.Sprintf(display, displaySuit)
 
 	s.ChannelMessageSend(m.ChannelID, display)
